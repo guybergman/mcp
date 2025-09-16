@@ -65,6 +65,10 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
 DB_CHARSET = os.getenv("DB_CHARSET")
 
+# --- SSL Configuration ---
+MYSQL_SSL = os.getenv("MYSQL_SSL", "false").lower() == "true"
+MYSQL_SSL_CA = os.getenv("MYSQL_SSL_CA") if MYSQL_SSL else None
+
 # --- MCP Server Configuration ---
 # Read-only mode
 MCP_READ_ONLY = os.getenv("MCP_READ_ONLY", "true").lower() == "true"

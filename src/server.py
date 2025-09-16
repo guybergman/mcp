@@ -2,7 +2,7 @@
 
 # Import configuration settings
 from config import (
-    DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_CHARSET,
+    DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_CHARSET, MYSQL_SSL, MYSQL_SSL_CA,
     MCP_READ_ONLY, MCP_MAX_POOL_SIZE, EMBEDDING_PROVIDER,
     ALLOWED_ORIGINS, ALLOWED_HOSTS,
     logger
@@ -99,12 +99,10 @@ class MariaDBServer:
 
             # Check for MYSQL_SSL env var
 
-            mysql_ssl = os.getenv("MYSQL_SSL", "false").lower() == "true"
-            if mysql_ssl:
-                mysql_ssl_ca = os.getenv("MYSQL_SSL_CA")
-                if mysql_ssl_ca:
-                    ssl_context = ssl.create_default_context(cafile=mysql_ssl_ca)
-                    logger.info(f"SSL connection enabled for database pool with CA file: {mysql_ssl_ca}")
+            if MYSQL_SSL:
+                if MYSQL_SSL_CA:
+                    ssl_context = ssl.create_default_context(cafile=MYSQL_SSL_CA)
+                    logger.info(f"SSL connection enabled for database pool with CA file: {MYSQL_SSL_CA}")
                 else:
                     ssl_context = ssl.create_default_context()
                     logger.info("SSL connection enabled for database pool with default CA certificates.")
