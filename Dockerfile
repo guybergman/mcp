@@ -1,4 +1,9 @@
+
 FROM python:3.11-slim
+
+# Set proxy environment variables for apt and pip
+ENV http_proxy=http://proxy-dmz.intel.com:912
+ENV https_proxy=http://proxy-dmz.intel.com:912
 
 # Install system dependencies  
 RUN apt-get update && apt-get install -y \
@@ -19,6 +24,8 @@ COPY . /app
 # Install project dependencies
 RUN uv sync
 
+# Expose the port your server runs on
 EXPOSE 9001
 
-CMD ["uv", "run", "src/server.py", "--host", "0.0.0.0", "--transport", "sse"]
+# Set the default command to run your server
+CMD ["uv", "run", "src/server.py", "--host", "0.0.0.0", "--transport", "http"]

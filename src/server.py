@@ -98,11 +98,17 @@ class MariaDBServer:
                 logger.info(f"Creating connection pool for {DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME} (max size: {MCP_MAX_POOL_SIZE})")
 
             # Check for MYSQL_SSL env var
+
             mysql_ssl = os.getenv("MYSQL_SSL", "false").lower() == "true"
             if mysql_ssl:
-                ssl_context = ssl.create_default_context()
+                mysql_ssl_ca = os.getenv("MYSQL_SSL_CA")
+                if mysql_ssl_ca:
+                    ssl_context = ssl.create_default_context(cafile=mysql_ssl_ca)
+                    logger.info(f"SSL connection enabled for database pool with CA file: {mysql_ssl_ca}")
+                else:
+                    ssl_context = ssl.create_default_context()
+                    logger.info("SSL connection enabled for database pool with default CA certificates.")
                 pool_params["ssl"] = ssl_context
-                logger.info("SSL connection enabled for database pool.")
             else:
                 logger.info("SSL connection not enabled for database pool.")
 
