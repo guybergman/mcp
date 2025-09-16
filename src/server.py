@@ -68,9 +68,11 @@ class MariaDBServer:
 
     async def initialize_pool(self):
         """Initializes the asyncmy connection pool within the running event loop."""
+        import os
+        import ssl
         if not all([DB_USER, DB_PASSWORD]):
-             logger.error("Cannot initialize pool due to missing database credentials.")
-             raise ConnectionError("Missing database credentials for pool initialization.")
+            logger.error("Cannot initialize pool due to missing database credentials.")
+            raise ConnectionError("Missing database credentials for pool initialization.")
 
         if self.pool is not None:
             logger.info("Connection pool already initialized.")
@@ -88,13 +90,22 @@ class MariaDBServer:
                 "autocommit": self.autocommit,
                 "pool_recycle": 3600
             }
-            
+
             if DB_CHARSET:
                 pool_params["charset"] = DB_CHARSET
                 logger.info(f"Creating connection pool for {DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME} (max size: {MCP_MAX_POOL_SIZE}, charset: {DB_CHARSET})")
             else:
                 logger.info(f"Creating connection pool for {DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME} (max size: {MCP_MAX_POOL_SIZE})")
-            
+
+            # Check for MYSQL_SSL env var
+            mysql_ssl = os.getenv("MYSQL_SSL", "false").lower() == "true"
+            if mysql_ssl:
+                ssl_context = ssl.create_default_context()
+                pool_params["ssl"] = ssl_context
+                logger.info("SSL connection enabled for database pool.")
+            else:
+                logger.info("SSL connection not enabled for database pool.")
+
             self.pool = await asyncmy.create_pool(**pool_params)
             logger.info("Connection pool initialized successfully.")
         except AsyncMyError as e:
